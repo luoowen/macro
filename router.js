@@ -24,10 +24,11 @@ import {
       },
       Info: {
         screen: Info,
-      },
+      },z
     },
     {
-      initialRouteName: 'Camera'
+      initialRouteName: 'Home',
+      headerMode: 'none'
     }
   );
   

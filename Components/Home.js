@@ -21,7 +21,7 @@ export default class Home extends React.Component {
         super(props);
 
         const firebaseConfig = {
-            apiKey: "",
+            apiKey: process.env.FIREBASE_API_KEY,
             authDomain: "macro-dbe61.firebaseapp.com",
             databaseURL: "https://macro-dbe61.firebaseio.com",
             projectId: "macro-dbe61",

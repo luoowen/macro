@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@react-native-community/async-storage": "^1.6.1",
+    "dotenv": "^8.1.0",
     "firebase": "^6.6.1",
     "native-base": "^2.13.8",
     "react": "16.8.6",

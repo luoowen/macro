@@ -27,7 +27,7 @@ import {
       },
     },
     {
-      initialRouteName: 'Home'
+      initialRouteName: 'Camera'
     }
   );
   

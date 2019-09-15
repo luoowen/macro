@@ -90,9 +90,17 @@ export default class Camera extends React.Component {
 
     toggle = value => () => this.setState(prevState => ({ [value]: !prevState[value] }));
 
+    componentDidMount() {
+        const { navigation } = this.props;
+        const url = navigation.getParam('url', 'some default value that doesnt matter');
+        this.setState({
+            image: url,
+        });
+        console.disableYellowBox = true;
+    }
+
     renderCamera() {
 
-        YellowBox.ignoredWarnings = ['Warning: ...'];
         const drawFocusRingPosition = {
             top: this.state.autoFocusPoint.drawRectPosition.y - 32,
             left: this.state.autoFocusPoint.drawRectPosition.x - 32,

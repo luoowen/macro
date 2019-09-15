@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import {
+    Alert,
+    ActivityIndicator,
     StyleSheet,
     View,
     Button,
@@ -7,18 +9,62 @@ import {
     Dimensions,
     FlatList,
     Text,
+    ScrollView,
+    TouchableOpacity,
 } from 'react-native';
+import { GOOGLE_API_KEY } from 'react-native-dotenv'
 
 export default class ViewPicture extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            titleText: 'Added Successfully',
-            justifyContent: 'center',
             image: "default",
-            food: [],
+            uploading: false,
+            googleResponse: {
+                "responses": [
+                    {
+                        "labelAnnotations": []
+                    }
+                ]
+            },
         };
     }
+
+    submitToGoogle = async () => {
+        try {
+            let body = JSON.stringify({
+                requests: [
+                    {
+                        features: [
+                            { type: 'LABEL_DETECTION', maxResults: 10 }
+                        ],
+                        image: { content: this.state.image }
+                    }
+                ]
+            });
+
+            fetch(
+                "https://vision.googleapis.com/v1/images:annotate?key=" + GOOGLE_API_KEY,
+                {
+                    headers: {
+                        Accept: "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    method: "POST",
+                    body: body
+                }
+            )
+                .then(res => res.json())
+                .then(json => {
+                    this.setState({ googleResponse: json.responses[0].labelAnnotations })
+                    console.log(json.responses[0].labelAnnotations);
+                })
+                .catch(err => console.log(err));
+
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     _onPressTakeAgain = () => {
         this.props.navigation.navigate('Camera')
@@ -29,13 +75,13 @@ export default class ViewPicture extends Component {
             style={styles.list}
             onPress={() => {
                 this.props.navigation.navigate('Info', {
-                    id: food.item,
+                    id: food.item.description,
                 })
             }}
         >
             <Text style={styles.lightText}>
                 {}
-                {food.item}
+                {food.item.description}
                 {}
             </Text>
         </TouchableOpacity>
@@ -43,11 +89,23 @@ export default class ViewPicture extends Component {
 
     FlatListItemSeparator = () => <View style={styles.line} />;
 
+    submit = (base) => {
+        this.setState({
+            image: base
+        }, function () { this.submitToGoogle() });
+    }
+
     componentDidMount() {
         const { navigation } = this.props;
+        var RNFS = require('react-native-fs');
         const url = navigation.getParam('url', 'some default value that doesnt matter');
         this.setState({
             image: url,
+        }, function () {
+            RNFS.readFile(this.state.image, 'base64')
+                .then(res => {
+                    this.submit(res);
+                });
         });
     }
 
@@ -59,20 +117,23 @@ export default class ViewPicture extends Component {
                     //for some reason, the picture will turn out sideways, so this style will rotate the picture by 90 degrees and make it fit the screen size
                     style={styles.image}
                 />
-                <View style={styles.button}>
-                    <Button onPress={this._onPressTakeAgain} title={"Take Again"} />
+                <Text>{"\n"}</Text>
+
+                <View style={styles.buttonContainer}>
+                    <Button onPress={this._onPressTakeAgain} title={"Take Picture Again"} />
                 </View>
+
                 <View style={styles.container}>
-                    <Text style={styles.title}>Activities</Text>
+                    <Text style={styles.title}>Is this a...</Text>
                     {this.FlatListItemSeparator()}
                     <FlatList
-                        data={this.state.array}
+                        data={this.state.googleResponse}
                         ItemSeparatorComponent={this.FlatListItemSeparator}
-                        renderItem={food => this.renderItem(food)}
-                        keyExtractor={(item, index) => index.toString()}
+                        renderItem={item => this.renderItem(item)}
+                        keyExtractor={(item, index) => item.id}
                     />
                 </View>
-            </View>
+            </View >
         );
     }
 }
@@ -84,10 +145,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#ffffff',
     },
+    scrollContainer: {
+        flex: 1,
+        backgroundColor: '#ffffff',
+    },
+    contentContainer: {
+        paddingTop: 30
+    },
     image: {
         flex: 1,
-        width: null,
-        height: null,
+        width: Dimensions.get('window').height / 2,
+        height: Dimensions.get('window').width / 1.25,
         resizeMode: 'contain',
         transform: [{ rotate: '90deg' }]
     },
@@ -113,8 +181,22 @@ const styles = StyleSheet.create({
         margin: 20
     },
     buttonContainer: {
-        flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
     },
 });
+
+//visualizeFood('./images/cookie.jpg').catch(console.error);
+
+/*
+ <View style={styles.container}>
+                        <Text style={styles.title}>Is this a?</Text>
+                        {this.FlatListItemSeparator()}
+                        <FlatList
+                            data={this.state.googleResponse.responses[0].labelAnnotations}
+                            ItemSeparatorComponent={this.FlatListItemSeparator}
+                            renderItem={item => this.renderItem(item)}
+                            keyExtractor={(item, index) => item.id}
+                        />
+                    </View>
+*/

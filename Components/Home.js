@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Card, CardItem, Body, Container, Content, List, ListItem, Left, Fab, Icon } from 'native-base';
 import * as firebase from 'firebase';
+import { FIREBASE_API_KEY } from 'react-native-dotenv';
 
 const cs = []
 
@@ -21,7 +22,7 @@ export default class Home extends React.Component {
         super(props);
 
         const firebaseConfig = {
-            apiKey: process.env.FIREBASE_API_KEY,
+            apiKey: FIREBASE_API_KEY,
             authDomain: "macro-dbe61.firebaseapp.com",
             databaseURL: "https://macro-dbe61.firebaseio.com",
             projectId: "macro-dbe61",

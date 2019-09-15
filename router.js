@@ -27,7 +27,8 @@ import {
       },
     },
     {
-      initialRouteName: 'Home'
+      initialRouteName: 'Home',
+      headerMode: 'none'
     }
   );
   
